@@ -45,6 +45,8 @@ modelbot --version
 modelbot --help
 ```
 
+![安装 CLI](docs/images/c01-install.png)
+
 升级到最新版：`pip install --upgrade git+https://github.com/Kaihui-AMD/modelbot-cli`。
 
 ## 2. 用 GitHub 账号注册
