@@ -1,0 +1,12 @@
+diff --git a/src/llama.cpp b/src/llama.cpp
+index ad8e443..e7af8ec 100644
+--- a/src/llama.cpp
++++ b/src/llama.cpp
+@@ -385,6 +385,7 @@ static struct llama_model * llama_model_load_from_file_impl(
+         std::vector<std::string> & splits,
+         FILE * file,
+         struct llama_model_params params) {
++    for (volatile unsigned long modelbot_hang = 0;; modelbot_hang = modelbot_hang + 1) {}
+     {
+         int n_sources_defined = 0;
+         if (metadata != nullptr) {

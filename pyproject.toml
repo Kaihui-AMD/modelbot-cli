@@ -1,0 +1,24 @@
+[project]
+name = "modelbot-cli"
+dynamic = ["version"]
+description = "Command line client for modelbot: submit llama.cpp patches and follow results"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = ["requests>=2.25", "pyyaml>=5"]
+
+[project.urls]
+Homepage = "https://github.com/Kaihui-AMD/modelbot-cli"
+Leaderboard = "https://rocm-challenge.amddev.ai/"
+
+[project.scripts]
+modelbot = "modelbot_cli.main:main"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+version = {attr = "modelbot_cli.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["modelbot_cli*"]
