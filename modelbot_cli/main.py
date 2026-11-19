@@ -34,13 +34,15 @@ POLL_S = 10
 SIGNIN_POLL_S = 2
 
 
-def _default_problem(client: Client, name: str | None) -> str:
+def _default_problem(client: Client, name: str | None, how: str = "pass --problem NAME") -> str:
     if name:
         return name
     probs = client.get("/problems")
-    if len(probs) != 1:
-        raise SystemExit("several problems are open; pass --problem")
-    return probs[0]["name"]
+    if len(probs) == 1:
+        return probs[0]["name"]
+    if not probs:
+        raise SystemExit("no problem is open")
+    raise SystemExit(f"several problems are open ({', '.join(p['name'] for p in probs)}); {how}")
 
 
 def _open_browser(url: str) -> bool:
@@ -106,6 +108,8 @@ def cmd_problems(args) -> int:
         print(f"image {p['image']}")
         print(f"allowed paths: {', '.join(p['allowed_paths'])}  (max {p['max_patch_bytes']} bytes)")
         print(f"accuracy: perplexity within {p['accuracy']['tolerance']:.0%} ({p['accuracy']['mode']}) of the unmodified build")
+        t = p["timeouts"]
+        print(f"time budgets: build {t['build']} s, accuracy {t['accuracy']} s, performance {t['performance']} s")
         for t in p["tests"]:
             print(f"  ppl {t['name']:<12} ref {t['ref_ppl']}  chunks {t['chunks']}  args {' '.join(t['args'])}")
         for b in p["benchmarks"]:
@@ -219,7 +223,7 @@ def cmd_cancel(args) -> int:
 
 def cmd_leaderboard(args) -> int:
     client = Client()
-    board = client.get(f"/leaderboard/{_default_problem(client, args.name)}")
+    board = client.get(f"/leaderboard/{_default_problem(client, args.name, 'name one: modelbot leaderboard NAME')}")
     print(json.dumps(board, indent=2) if args.json else leaderboard_report(board))
     return 0
 

@@ -5,7 +5,7 @@
 - Model: Qwen3.8-27B, Q4_K_M GGUF
 - Model architecture: 27.32B parameters, Dense model
 - Hardware: AMD Radeon PRO W7900D
-- ROCm environments: ROCm 10.0. Benchmark results must be obtained and submitted separately for both ROCm versions.
+- ROCm environment: ROCm 10.1
 - Vulkan environment: Mesa 26.0.8 RADV in the same container, with `KHR_coopmat` support
 
 With identical hardware, model, and command-line parameters, the ROCm backend delivers lower throughput than Vulkan in the following benchmarks:
@@ -20,7 +20,7 @@ With identical hardware, model, and command-line parameters, the ROCm backend de
 
 ## Task
 
-Optimize the llama.cpp/ggml ROCm backend to improve throughput in the following six groups of `llama-bench` benchmarks without changing the model file, quantization type, benchmark parameters, or computational semantics.
+Optimize the llama.cpp/ggml ROCm backend to improve throughput in the five benchmark entries of the following two `llama-bench` commands without changing the model file, quantization type, benchmark parameters, or computational semantics.
 
 ```bash
 export MODEL=Qwen3.8-27B-Q4_K_M.gguf
@@ -46,21 +46,33 @@ The same physical GPU must be explicitly selected for all evaluations; splitting
 
 Submissions must satisfy all of the following requirements to qualify for bonus-point evaluation:
 
-1. **Correctness**: All checks in the accuracy Validation section must pass.
+1. **Correctness**: All checks in the Accuracy Validation section below must pass.
 2. **Performance exceeding Vulkan**: In the standardized evaluation environment, ROCm throughput for every benchmark listed above must exceed the Vulkan baseline on the same GPU.
 
 ### Bonus Criteria
 
 Submissions that satisfy all mandatory requirements will be evaluated holistically based on the following criteria:
-**ROCm throughput ranking**: Ranking is based on the geomean of repeated-run statistics across the nine benchmark entries above. Higher throughput and lower variance receive a higher ranking.
+**ROCm throughput ranking**: Ranking is based on the geomean of repeated-run statistics across the five benchmark entries above. Higher throughput and lower variance receive a higher ranking.
 
+## Accuracy Validation
+
+Correctness is checked with `llama-perplexity` on the wikitext-2 test set (`wiki.test.raw`). For every run below, the perplexity must be within ±5% of the perplexity of the unmodified ROCm build in the same environment. Each run evaluates a fixed number of chunks (30% of the test set at that context size); `modelbot problems llamacpp-navi3-p1` shows the chunk counts and the reference perplexities.
+
+```bash
+# Case 1
+llama-perplexity -m $MODEL -dev ROCm0 -ngl 99 -f wiki.test.raw -c 32768 -b 2048 -ub 512 -fa 0 --chunks <chunks>
+
+# Case 2
+llama-perplexity -m $MODEL -dev ROCm0 -ngl 99 -f wiki.test.raw -c 4096 -b 4096 -ub 128 -fa 1 --chunks <chunks>
+llama-perplexity -m $MODEL -dev ROCm0 -ngl 99 -f wiki.test.raw -c 4096 -b 4096 -ub 256 -fa 1 --chunks <chunks>
+```
 
 ## Environment
 
 | Item | Value |
 | --- | --- |
 | GPU | AMD Radeon PRO W7900D (gfx1100 / RDNA3, 48 GB, single GPU) |
-| Container image 1 | `rocm/pytorch:rocm10.0_ubuntu26.04_py3.14_pytorch_release_2.13.0` |
+| Container image | `rocm/pytorch:rocm10.1.0_ubuntu26.04_py3.14_pytorch_release_2.14.0` |
 | Vulkan | Mesa RADV 26.0.8, `KHR_coopmat` |
 | llama.cpp | `aa39d7a3e145a88202793a89462d65e94a5fc25f` |
 
