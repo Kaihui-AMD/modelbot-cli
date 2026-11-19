@@ -4,7 +4,7 @@
   modelbot reregister github [--api URL] [--no-browser]
   modelbot whoami
   modelbot problems [NAME]
-  modelbot submit PATCH --problem NAME [--mode test|leaderboard] [--no-wait] [--base DIR]
+  modelbot submit PATCH --problem NAME [--no-wait] [--base DIR]
   modelbot status ID [--wait]
   modelbot list [--problem NAME]
   modelbot logs ID [LOG]
@@ -149,8 +149,8 @@ def cmd_submit(args) -> int:
             print(f"  - {p}")
         return 2
     with patch.open("rb") as f:
-        sub = client.post(f"/submissions/{problem}/{args.mode}", files={"file": (patch.name, f, "text/x-diff")})
-    print(f"submitted {patch.name} to {problem}@{sub['version']} as submission {sub['id']} ({args.mode})")
+        sub = client.post(f"/submissions/{problem}/leaderboard", files={"file": (patch.name, f, "text/x-diff")})
+    print(f"submitted {patch.name} to {problem}@{sub['version']} as submission {sub['id']}")
     if args.no_wait:
         print(status_line(sub))
         return 0
@@ -249,8 +249,6 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("submit", help="submit a patch")
     p.add_argument("patch")
     p.add_argument("--problem")
-    p.add_argument("--mode", choices=["test", "leaderboard"], default="leaderboard",
-                   help="test: build + accuracy only; leaderboard: full evaluation, ranked")
     p.add_argument("--no-wait", action="store_true")
     p.add_argument("--base", help="llama.cpp checkout at the base commit, to run `git apply --check` locally")
     p.set_defaults(func=cmd_submit)
