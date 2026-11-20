@@ -180,6 +180,7 @@ modelbot leaderboard llamacpp-navi3-p1 --json   # 原始数据
 排名规则：
 
 - 每道题单独排名，只统计该题当前版本的提交，每个选手取自己最好的一次；
+- 被组织者判定违规的提交不参与排名，如果你在同一道题还有别的有效成绩，榜上改为显示次好的那条；
 - 上表 Qualified 是每一项都快过 Vulkan 的选手，下表是精度通过但还没全部快过 Vulkan 的选手（已经上了上表的不会再出现在下表）；
 - 按分数从高到低排；分数相同看平均 cv（越稳定越靠前），再相同看提交时间。
 
@@ -206,6 +207,8 @@ modelbot leaderboard llamacpp-navi3-p1 --json   # 原始数据
 | `timeout` / `crash` / `output_invalid` / `bench_rows_mismatch` | 超时 / 工具崩溃 / 输出无法解析 / benchmark 输出的行和规定的各项对不上 |
 | `forbidden_path` / `patch_apply_failed` / `binary_patch` / `empty_patch` / `patch_too_large` | 补丁不合格（通常在提交时就被拒绝，不会排队） |
 | 其他（如 `run_not_found`、`no_result`、`attempt_timeout`） | 基础设施错误，见上表的 `error` |
+
+被组织者判定违规的提交，`modelbot list` 在行末标 `disqualified`，`modelbot status` 的报告开头写明原因（`disqualified by the organizers: ...`），它不再参与排名。
 
 CLI 退出码：0 表示精度通过、性能也测完了（不论是否快过 Vulkan），1 表示没通过，2 表示本地预检失败，3 表示 API 报错（例如超过提交次数限制、暂停提交、截止时间已过）。
 

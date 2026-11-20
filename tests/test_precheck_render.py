@@ -5,7 +5,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 
 from modelbot_cli.precheck import check_local, patch_paths  # noqa: E402
-from modelbot_cli.render import leaderboard_report, result_report  # noqa: E402
+from modelbot_cli.render import leaderboard_report, result_report, status_line  # noqa: E402
 
 PATCHES = HERE / "fixtures"
 ALLOWED = ["ggml/", "src/"]
@@ -55,6 +55,13 @@ def test_result_report():
     assert "accuracy     passed" in text and "fa0_c32768" in text and "x0.885  slower" in text
     assert "score 0.8552" in text and "ran on AMD Radeon Pro W7900D (gfx1100)" in text
     assert "not faster than Vulkan on every item" in text and "run:" not in text
+
+
+def test_disqualified_marks():
+    sub = {**RESULT, "disqualified_at": "2026-11-20T08:00:00+00:00", "disqualified_reason": "copied a patch"}
+    assert "disqualified by the organizers: copied a patch (not on the leaderboard)" in result_report(sub)
+    assert status_line(sub) == "submission 5 [leaderboard] evaluated (disqualified)"
+    assert "disqualified" not in result_report(RESULT) and "disqualified" not in status_line(RESULT)
 
 
 def test_leaderboard_report():

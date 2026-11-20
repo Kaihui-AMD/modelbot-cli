@@ -178,8 +178,9 @@ def cmd_list(args) -> int:
         params["problem"] = args.problem
     for s in client.get("/user/submissions", params=params):
         score = f"{s['score']:.4f}" if s.get("score") is not None else "-"
+        mark = "  disqualified" if s.get("disqualified_at") else ""
         print(f"{s['id']:>6}  {s['created_at'][:19]}  {s['mode']:<11} {s['status']:<10} {str(s.get('reason')):<20}"
-              f" score {score:<8} qualified={s.get('qualified')}")
+              f" score {score:<8} qualified={s.get('qualified')}{mark}")
     return 0
 
 

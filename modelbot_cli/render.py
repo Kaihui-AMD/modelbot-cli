@@ -21,6 +21,8 @@ def status_line(sub: dict) -> str:
         text += f" (position {sub['queue_position']})"
     if sub.get("status") == "queued" and sub.get("attempts"):
         text += f", retry after: {sub.get('reason')}"
+    if sub.get("disqualified_at"):
+        text += " (disqualified)"
     return f"submission {sub['id']} [{sub['mode']}] {text}"
 
 
@@ -32,6 +34,9 @@ def result_report(sub: dict) -> str:
     res = sub.get("result")
     lines = [f"submission {sub['id']}  {sub['problem']}@{sub['version']}  mode={sub['mode']}  status={sub['status']}"
              f"  reason={sub.get('reason')}"]
+    if sub.get("disqualified_at"):
+        lines.append(f"  disqualified by the organizers: {sub.get('disqualified_reason')}"
+                     " (not on the leaderboard)")
     if res is None:
         if sub.get("message"):
             lines.append(f"  message: {sub['message']}")
