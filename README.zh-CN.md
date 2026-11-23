@@ -122,16 +122,12 @@ modelbot cancel <编号>      # 排队中的直接取消，在评测的会停止
 
 ![排队与取消](docs/images/c07-queue-cancel.png)
 
-## 8. 历史提交、日志与补丁
+## 8. 历史提交与补丁
 
 ```bash
 modelbot list                    # 自己的提交；--problem 过滤，--limit 显示更多
-modelbot logs <编号>             # 列出该提交的日志文件
-modelbot logs <编号> <日志名>     # 打印某个日志：编译输出、GPU 检查、每组 llama-perplexity 和每条 llama-bench
 modelbot patch <编号> [-o 文件]   # 下载自己提交过的补丁
 ```
-
-较长的日志只保留开头和结尾。
 
 ## 9. 排行榜
 
@@ -186,7 +182,6 @@ modelbot leaderboard llamacpp-navi3-p1 --json   # 原始数据
 | `modelbot submit PATCH --problem NAME [--no-wait] [--base DIR]` | 提交补丁并等待结果 |
 | `modelbot status ID [--wait] [--json]` | 查看一条提交 |
 | `modelbot list [--problem NAME] [--limit N]` | 自己的提交列表 |
-| `modelbot logs ID [LOG]` | 列出或打印日志 |
 | `modelbot patch ID [-o FILE]` | 下载提交过的补丁 |
 | `modelbot cancel ID` | 取消提交 |
 | `modelbot leaderboard [NAME] [--json]` | 排行榜；开放多道题时要写题目名 |

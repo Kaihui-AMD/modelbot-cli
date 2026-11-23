@@ -7,7 +7,6 @@
   modelbot submit PATCH --problem NAME [--no-wait] [--base DIR]
   modelbot status ID [--wait]
   modelbot list [--problem NAME]
-  modelbot logs ID [LOG]
   modelbot patch ID [-o FILE]
   modelbot cancel ID
   modelbot leaderboard [NAME]
@@ -184,17 +183,6 @@ def cmd_list(args) -> int:
     return 0
 
 
-def cmd_logs(args) -> int:
-    client = Client()
-    if args.name:
-        print(client.text(f"/user/submissions/{args.id}/logs/{args.name}"), end="")
-        return 0
-    sub = client.get(f"/user/submissions/{args.id}")
-    for name in sub.get("logs", []):
-        print(name)
-    return 0
-
-
 def cmd_patch(args) -> int:
     """Download the archived patch for one of your submissions."""
     client = Client()
@@ -268,11 +256,6 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--problem")
     p.add_argument("--limit", type=int, default=20)
     p.set_defaults(func=cmd_list)
-
-    p = sub.add_parser("logs", help="list or print the logs of a submission")
-    p.add_argument("id", type=int)
-    p.add_argument("name", nargs="?")
-    p.set_defaults(func=cmd_logs)
 
     p = sub.add_parser("patch", help="download the archived patch of a submission")
     p.add_argument("id", type=int)

@@ -122,16 +122,12 @@ In the screenshot the user already has one submission running and two queued, so
 
 ![Queue and cancel](docs/images/c07-queue-cancel.png)
 
-## 8. Submissions, logs and patches
+## 8. Submissions and patches
 
 ```bash
 modelbot list                    # your submissions; --problem to filter, --limit for more
-modelbot logs <id>               # the log files of a submission
-modelbot logs <id> <log>         # print one: build output, GPU check, each llama-perplexity and llama-bench run
 modelbot patch <id> [-o FILE]    # download a patch you submitted
 ```
-
-Long logs keep their beginning and their end.
 
 ## 9. Leaderboard
 
@@ -186,7 +182,6 @@ Exit codes: 0 when accuracy passed and the benchmarks ran (faster than Vulkan or
 | `modelbot submit PATCH --problem NAME [--no-wait] [--base DIR]` | submit a patch and wait for the result |
 | `modelbot status ID [--wait] [--json]` | one submission |
 | `modelbot list [--problem NAME] [--limit N]` | your submissions |
-| `modelbot logs ID [LOG]` | list or print the logs of a submission |
 | `modelbot patch ID [-o FILE]` | download a submitted patch |
 | `modelbot cancel ID` | cancel a submission |
 | `modelbot leaderboard [NAME] [--json]` | leaderboard; name the problem when several are open |

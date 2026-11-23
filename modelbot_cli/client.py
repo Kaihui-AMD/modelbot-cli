@@ -67,9 +67,6 @@ class Client:
     def get(self, path: str, **kw):
         return self.request("GET", path, **kw).json()
 
-    def text(self, path: str) -> str:
-        return self.request("GET", path).text
-
     def bytes(self, path: str) -> tuple[bytes, dict]:
         """GET a binary body; returns (content, response headers)."""
         resp = self.request("GET", path)
