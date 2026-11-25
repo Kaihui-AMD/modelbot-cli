@@ -36,7 +36,7 @@ A submission waits in the queue, then runs on one AMD Radeon PRO W7900D (ROCm 10
 - **Score**: the geometric mean over the items of ROCm throughput divided by the Vulkan baseline; higher is better. **Qualified**: every item is faster than its Vulkan baseline.
 - An evaluation takes about 13 minutes for problem 1, 16 for problem 2 and 4 for problem 3, without the queue.
 - You have at most one submission running at a time, across all problems; the others wait in the queue.
-- Limit: 6 submissions per hour per problem. Infrastructure errors (`error`) do not count.
+- Limits: 6 submissions per hour per problem, and 20 per user per day across all problems (Asia/Shanghai calendar day). Infrastructure errors (`error`) do not count.
 
 ## 1. Install
 
