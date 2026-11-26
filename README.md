@@ -98,7 +98,7 @@ The CLI checks the status every 10 seconds, prints a line when it changes, and e
 
 ![Result report](docs/images/c08-submit-leaderboard.png)
 
-The screenshot is the unmodified code on problem 1.
+The screenshot is the unmodified code on problem 1: score 0.8500, and only `pp4096-ub256-fa1` is faster than its target.
 
 ## 6. When a submission fails
 
