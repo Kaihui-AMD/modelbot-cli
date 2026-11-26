@@ -37,7 +37,7 @@ def test_not_a_git_patch(tmp_path):
 
 RESULT = {
     "id": 5, "problem": "llamacpp-navi3-p1", "version": "v1", "mode": "leaderboard", "status": "succeeded",
-    "reason": "below_vulkan", "message": None,
+    "reason": "below_target", "message": None,
     "result": {"outcome": "succeeded", "passed": True, "qualified": False, "message": "not faster on: a",
                "score": {"value": 0.8552},
                "environment": {"gpu_name": "AMD Radeon Pro W7900D", "gpu_arch": "gfx1100"},
@@ -54,7 +54,8 @@ def test_result_report():
     text = result_report(RESULT)
     assert "accuracy     passed" in text and "fa0_c32768" in text and "x0.885  slower" in text
     assert "score 0.8552" in text and "ran on AMD Radeon Pro W7900D (gfx1100)" in text
-    assert "not faster than Vulkan on every item" in text and "run:" not in text
+    assert "not faster than the target on every item" in text and "target   34.21" in text
+    assert "run:" not in text
 
 
 def test_disqualified_marks():

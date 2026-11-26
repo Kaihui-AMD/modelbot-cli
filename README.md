@@ -7,10 +7,8 @@ English | [中文](README.zh-CN.md)
 | Problem | Model | Focus | Items | Statement |
 |---|---|---|---|---|
 | `llamacpp-navi3-p1` | Qwen3.8-27B Q4_K_M | long-context decode, small-ubatch prefill | 5 | [problem 1](https://github.com/Kaihui-AMD/modelbot-cli/blob/main/problem/problem1_EN_navi3.md) |
-| `llamacpp-navi3-p2` | Qwen3-Next-80B-A3B-Instruct IQ2_XXS | prefill | 6 | [problem 2](https://github.com/Kaihui-AMD/modelbot-cli/blob/main/problem/problem2_EN_navi3.md) |
-| `llamacpp-navi3-p3` | Kimi-Linear-48B-A3B-Instruct IQ4_XS | decode | 4 | [problem 3](https://github.com/Kaihui-AMD/modelbot-cli/blob/main/problem/problem3_EN_navi3.md) |
 
-Each problem has its own leaderboard: https://rocm-challenge.amddev.ai/
+Problem 1 is open now; more problems open later. Leaderboard: https://rocm-challenge.amddev.ai/
 
 ## Quick start
 
@@ -31,11 +29,11 @@ A submission waits in the queue, then runs on one AMD Radeon PRO W7900D (ROCm 10
 | Patch | applies with `git apply --check` to the base commit `aa39d7a3`; touches only `ggml/` and `src/`; at most 1 MiB; no binaries, symlinks or submodules | rejected at submission, not queued |
 | Build | incremental build of `llama-bench`, `llama-perplexity` and `llama-tokenize` (Release, `GGML_HIP=ON`, gfx1100) with the build options unchanged | `failed` / `build_failed` |
 | Accuracy | two or three `llama-perplexity` runs on wikitext-2 (test) with fixed chunk counts, each within ±5% of the unmodified build (see the statement's Accuracy Validation) | `succeeded` / `accuracy_failed` |
-| Performance | the `llama-bench` items of the statement | `succeeded` / `below_vulkan` |
+| Performance | the `llama-bench` items of the statement | `succeeded` / `below_target` |
 
-- **Score**: the geometric mean over the items of ROCm throughput divided by the Vulkan baseline; higher is better. **Qualified**: every item is faster than its Vulkan baseline.
-- An evaluation takes about 13 minutes for problem 1, 16 for problem 2 and 4 for problem 3, without the queue.
-- You have at most one submission running at a time, across all problems; the others wait in the queue.
+- **Score**: the geometric mean over the items of ROCm throughput divided by the item's target; higher is better. **Qualified**: every item is faster than its target.
+- An evaluation takes about 13 minutes, without the queue.
+- You have at most one submission running at a time; the others wait in the queue.
 - Limits: 6 submissions per hour per problem, and 20 per user per day across all problems (Asia/Shanghai calendar day). Infrastructure errors (`error`) do not count.
 
 ## 1. Install
@@ -76,7 +74,7 @@ modelbot problems llamacpp-navi3-p1    # one problem
 
 ![Problems](docs/images/c03-problems.png)
 
-The details show the base commit, the evaluation image (pinned by digest), the allowed paths, the time budget of each stage, every perplexity run with its reference and chunk count, and the Vulkan baseline of every benchmark item. All problems use the same base commit and image, so one patch can be submitted to several of them.
+The details show the base commit, the evaluation image (pinned by digest), the allowed paths, the time budget of each stage, every perplexity run with its reference and chunk count, and the target of every benchmark item.
 
 ## 4. Make a patch
 
@@ -96,11 +94,11 @@ modelbot submit my.patch --problem llamacpp-navi3-p1
 modelbot status <id>          # the same report again later
 ```
 
-With several problems open, `submit` needs `--problem`. The CLI checks the status every 10 seconds, prints a line when it changes, and ends with the report: every gate with its duration, every perplexity run with its reference and ratio, every benchmark item with the ROCm throughput, the Vulkan baseline, their ratio and the coefficient of variation (cv) of the repetitions, then the score and the GPU.
+The CLI checks the status every 10 seconds, prints a line when it changes, and ends with the report: every gate with its duration, every perplexity run with its reference and ratio, every benchmark item with the ROCm throughput, its target, their ratio and the coefficient of variation (cv) of the repetitions, then the score and the GPU.
 
 ![Result report](docs/images/c08-submit-leaderboard.png)
 
-The screenshot is the unmodified code on problem 1: score 0.8498, and only `pp4096-ub256-fa1` is faster than Vulkan.
+The screenshot is the unmodified code on problem 1.
 
 ## 6. When a submission fails
 
@@ -138,12 +136,12 @@ modelbot leaderboard llamacpp-navi3-p1 --json   # raw data
 
 ![Leaderboard in the CLI](docs/images/c13-leaderboard.png)
 
-The web leaderboard (read-only, refreshed every minute) has one section per problem: https://rocm-challenge.amddev.ai/
+The web leaderboard (read-only, refreshed every minute) has one section per open problem: https://rocm-challenge.amddev.ai/
 
 ![Web leaderboard](docs/images/w01-leaderboard.png)
 
-- Every problem is ranked separately, over its current version; each user's best submission counts.
-- **Qualified** lists the users faster than Vulkan on every item. **Accuracy passed** lists the other users whose accuracy passed; nobody is listed in both.
+- Each problem is ranked over its current version; each user's best submission counts.
+- **Qualified** lists the users faster than the target on every item. **Accuracy passed** lists the other users whose accuracy passed; nobody is listed in both.
 - Order: score, then the lower mean cv, then the earlier submission.
 - Submissions the organizers disqualify do not count, so your next best submission takes their place. `modelbot list` marks them `disqualified` and `modelbot status` shows the reason.
 
@@ -163,15 +161,15 @@ The web leaderboard (read-only, refreshed every minute) has one section per prob
 
 | reason | Meaning |
 |---|---|
-| `ok` | accuracy passed and every item is faster than Vulkan (qualified) |
-| `below_vulkan` | accuracy passed and the benchmarks ran, but at least one item is slower than Vulkan |
+| `ok` | accuracy passed and every item is faster than its target (qualified) |
+| `below_target` | accuracy passed and the benchmarks ran, but at least one item is not faster than its target |
 | `accuracy_failed` | a perplexity run is outside ±5% |
 | `build_failed`, `build_timeout`, `build_flags_changed` | the build failed, timed out, or the patch changed the required build options |
 | `timeout`, `crash`, `output_invalid`, `bench_rows_mismatch` | a stage timed out, a tool crashed, its output could not be parsed, or the benchmark rows do not match the items |
 | `forbidden_path`, `patch_apply_failed`, `binary_patch`, `empty_patch`, `patch_too_large` | invalid patch, normally rejected at submission |
 | others, such as `run_not_found`, `no_result`, `attempt_timeout` | infrastructure error, see `error` |
 
-Exit codes: 0 when accuracy passed and the benchmarks ran (faster than Vulkan or not), 1 when the submission did not pass, 2 when the local pre-check failed, 3 for API errors such as the rate limit, paused submissions or a passed deadline. The deadlines are shown by `modelbot problems`.
+Exit codes: 0 when accuracy passed and the benchmarks ran (faster than the targets or not), 1 when the submission did not pass, 2 when the local pre-check failed, 3 for API errors such as the rate limit, paused submissions or a passed deadline. The deadlines are shown by `modelbot problems`.
 
 | Command | Purpose |
 |---|---|

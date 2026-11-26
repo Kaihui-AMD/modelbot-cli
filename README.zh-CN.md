@@ -7,10 +7,8 @@
 | 题目 | 模型 | 侧重 | 项数 | 题面 |
 |---|---|---|---|---|
 | `llamacpp-navi3-p1` | Qwen3.8-27B Q4_K_M | 长上下文 decode、小 ubatch prefill | 5 | [第 1 题](https://github.com/Kaihui-AMD/modelbot-cli/blob/main/problem/problem1_EN_navi3.md) |
-| `llamacpp-navi3-p2` | Qwen3-Next-80B-A3B-Instruct IQ2_XXS | prefill | 6 | [第 2 题](https://github.com/Kaihui-AMD/modelbot-cli/blob/main/problem/problem2_EN_navi3.md) |
-| `llamacpp-navi3-p3` | Kimi-Linear-48B-A3B-Instruct IQ4_XS | decode | 4 | [第 3 题](https://github.com/Kaihui-AMD/modelbot-cli/blob/main/problem/problem3_EN_navi3.md) |
 
-每道题单独排名，网页排行榜：https://rocm-challenge.amddev.ai/
+目前开放第 1 题，其他题目之后再开放。网页排行榜：https://rocm-challenge.amddev.ai/
 
 ## 快速开始
 
@@ -31,11 +29,11 @@ modelbot leaderboard llamacpp-navi3-p1
 | 补丁 | `git apply --check` 能打到基准 commit `aa39d7a3` 上；只改 `ggml/` 和 `src/`；不超过 1 MiB；不含二进制、符号链接或子模块 | 提交时直接拒绝，不排队 |
 | 编译 | 增量编译 `llama-bench`、`llama-perplexity`、`llama-tokenize`（Release，`GGML_HIP=ON`，gfx1100），编译选项不能改 | `failed` / `build_failed` |
 | 精度 | 两到三组 `llama-perplexity`（wikitext-2 test，chunk 数固定），每组 PPL 与未修改版本的偏差在 ±5% 以内（见题面的 Accuracy Validation） | `succeeded` / `accuracy_failed` |
-| 性能 | 题面列出的各项 `llama-bench` | `succeeded` / `below_vulkan` |
+| 性能 | 题面列出的各项 `llama-bench` | `succeeded` / `below_target` |
 
-- **分数**：各项 ROCm 吞吐与 Vulkan 基线之比的几何平均，越高越好。**qualified**：每一项都快过 Vulkan。
-- 不算排队，一次评测第 1 题约 13 分钟、第 2 题约 16 分钟、第 3 题约 4 分钟。
-- 每人同时只有一个提交在评测（不论哪道题），其余的排队。
+- **分数**：各项 ROCm 吞吐与该项 target 之比的几何平均，越高越好。**qualified**：每一项都快过自己的 target。
+- 不算排队，一次评测约 13 分钟。
+- 每人同时只有一个提交在评测，其余的排队。
 - 提交限制：每道题每人每小时 6 次；每人每天（Asia/Shanghai 自然日）全部题目合计 20 次。基础设施错误（`error`）不计数。
 
 ## 1. 安装
@@ -76,7 +74,7 @@ modelbot problems llamacpp-navi3-p1    # 某道题的详情
 
 ![查看题目](docs/images/c03-problems.png)
 
-详情里有基准 commit、评测镜像（按 digest 固定）、允许修改的路径、各阶段的时间预算、每组 PPL 的参考值和 chunk 数，以及每项 benchmark 的 Vulkan 基线。三道题用同一个基准 commit 和评测镜像，同一个补丁可以分别提交到几道题。
+详情里有基准 commit、评测镜像（按 digest 固定）、允许修改的路径、各阶段的时间预算、每组 PPL 的参考值和 chunk 数，以及每项 benchmark 的 target。
 
 ## 4. 制作补丁
 
@@ -96,11 +94,11 @@ modelbot submit my.patch --problem llamacpp-navi3-p1
 modelbot status <编号>        # 之后随时再看这份报告
 ```
 
-开放了多道题时，`submit` 必须用 `--problem` 指定题目。CLI 每 10 秒查询一次状态，有变化就打印一行，最后打印结果报告：每道关的结果和耗时，每组 PPL 的实测值、参考值和比值，每项 benchmark 的 ROCm 吞吐、Vulkan 基线、两者之比和多次重复的变异系数（cv），最后是分数和评测用的 GPU。
+CLI 每 10 秒查询一次状态，有变化就打印一行，最后打印结果报告：每道关的结果和耗时，每组 PPL 的实测值、参考值和比值，每项 benchmark 的 ROCm 吞吐、target、两者之比和多次重复的变异系数（cv），最后是分数和评测用的 GPU。
 
 ![结果报告](docs/images/c08-submit-leaderboard.png)
 
-截图是第 1 题未修改的代码：分数 0.8498，只有 `pp4096-ub256-fa1` 快过 Vulkan。
+截图是第 1 题未修改的代码。
 
 ## 6. 没通过时会看到什么
 
@@ -138,12 +136,12 @@ modelbot leaderboard llamacpp-navi3-p1 --json   # 原始数据
 
 ![CLI 排行榜](docs/images/c13-leaderboard.png)
 
-网页排行榜（只读，每分钟自动刷新）每道题一节：https://rocm-challenge.amddev.ai/
+网页排行榜（只读，每分钟自动刷新）每道开放的题目一节：https://rocm-challenge.amddev.ai/
 
 ![网页排行榜](docs/images/w01-leaderboard.png)
 
-- 每道题单独排名，只统计该题当前版本的提交，每个选手取自己最好的一次。
-- **Qualified** 是每一项都快过 Vulkan 的选手，**Accuracy passed** 是精度通过的其他选手，同一个人不会同时出现在两张表里。
+- 只统计题目当前版本的提交，每个选手取自己最好的一次。
+- **Qualified** 是每一项都快过 target 的选手，**Accuracy passed** 是精度通过的其他选手，同一个人不会同时出现在两张表里。
 - 先按分数排，分数相同看平均 cv（越小越靠前），再相同看提交时间。
 - 被组织者判定违规的提交不参与排名，你次好的那条成绩会顶上来。`modelbot list` 会在这条提交后面标 `disqualified`，`modelbot status` 会写明原因。
 
@@ -163,15 +161,15 @@ modelbot leaderboard llamacpp-navi3-p1 --json   # 原始数据
 
 | reason | 含义 |
 |---|---|
-| `ok` | 精度通过，每一项都快过 Vulkan（qualified） |
-| `below_vulkan` | 精度通过、性能已测，但至少有一项没快过 Vulkan |
+| `ok` | 精度通过，每一项都快过自己的 target（qualified） |
+| `below_target` | 精度通过、性能已测，但至少有一项没快过自己的 target |
 | `accuracy_failed` | 有一组 PPL 超出 ±5% |
 | `build_failed`、`build_timeout`、`build_flags_changed` | 编译失败、编译超时、补丁改动了规定的编译选项 |
 | `timeout`、`crash`、`output_invalid`、`bench_rows_mismatch` | 阶段超时、工具崩溃、输出无法解析、benchmark 输出的行和规定的各项对不上 |
 | `forbidden_path`、`patch_apply_failed`、`binary_patch`、`empty_patch`、`patch_too_large` | 补丁不合格，通常在提交时就被拒绝 |
 | 其他，如 `run_not_found`、`no_result`、`attempt_timeout` | 基础设施错误，见上表的 `error` |
 
-退出码：0 表示精度通过、性能已测（不论是否快过 Vulkan），1 表示没通过，2 表示本地预检失败，3 表示 API 报错，例如超过提交次数、暂停提交、截止时间已过。截止时间见 `modelbot problems`。
+退出码：0 表示精度通过、性能已测（不论是否快过 target），1 表示没通过，2 表示本地预检失败，3 表示 API 报错，例如超过提交次数、暂停提交、截止时间已过。截止时间见 `modelbot problems`。
 
 | 命令 | 作用 |
 |---|---|

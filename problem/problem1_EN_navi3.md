@@ -6,17 +6,16 @@
 - Model architecture: 27.32B parameters, Dense model
 - Hardware: AMD Radeon PRO W7900D
 - ROCm environment: ROCm 10.1
-- Vulkan environment: Mesa 26.0.8 RADV in the same container, with `KHR_coopmat` support
 
-With identical hardware, model, and command-line parameters, the ROCm backend delivers lower throughput than Vulkan in the following benchmarks:
+The unmodified ROCm backend is below the target throughput in the following benchmarks:
 
-| Case | Key Parameters | Vulkan | ROCm | ROCm Slowdown |
+| Case | Key Parameters | Target | ROCm | ROCm Slowdown |
 | --- | --- | ---: | ---: | ---: |
-| 1 | `tg128, d=2048, fa=0` | 34.21 ± 0.19 t/s | **30.47 ± 0.31 t/s** | **12.3%** |
-| 1 | `tg128, d=8192, fa=0` | 32.27 ± 0.12 t/s | **26.94 ± 0.25 t/s** | **19.8%** |
-| 1 | `tg128, d=32768, fa=0` | 26.62 ± 0.03 t/s | **18.04 ± 0.10 t/s** | **47.6%** |
-| 2 | `pp4096, ubatch=128, fa=1` | 637.43 ± 0.48 t/s | **528.05 ± 0.85 t/s** | **20.7%** |
-| 2 | `pp4096, ubatch=256, fa=1` | 687.88 ± 1.01 t/s | **753.43 ± 0.77 t/s** | **-8.7%** |
+| 1 | `tg128, d=2048, fa=0` | 34.21 t/s | **30.47 ± 0.31 t/s** | **12.3%** |
+| 1 | `tg128, d=8192, fa=0` | 32.27 t/s | **26.94 ± 0.25 t/s** | **19.8%** |
+| 1 | `tg128, d=32768, fa=0` | 26.62 t/s | **18.04 ± 0.10 t/s** | **47.6%** |
+| 2 | `pp4096, ubatch=128, fa=1` | 637.43 t/s | **528.05 ± 0.85 t/s** | **20.7%** |
+| 2 | `pp4096, ubatch=256, fa=1` | 687.88 t/s | **753.43 ± 0.77 t/s** | **-8.7%** |
 
 ## Task
 
@@ -32,13 +31,7 @@ llama-bench -m $MODEL -dev ROCm0 -p 0 -n 128 -d 2048,8192,32768 -fa 0 -r 5
 llama-bench -m $MODEL -dev ROCm0 -p 4096 -n 0 -ub 128,256 -fa 1 -r 10
 ```
 
-For the Vulkan baseline, replace only the device parameter and keep all other parameters identical:
-
-```bash
--dev Vulkan0
-```
-
-The same physical GPU must be explicitly selected for all evaluations; splitting the model across multiple GPUs is not allowed. After moving to another machine, verify the ROCm-to-Vulkan device mapping using the PCI bus.
+The same physical GPU must be explicitly selected for all evaluations; splitting the model across multiple GPUs is not allowed.
 
 ## Evaluation Criteria
 
@@ -47,7 +40,7 @@ The same physical GPU must be explicitly selected for all evaluations; splitting
 Submissions must satisfy all of the following requirements to qualify for bonus-point evaluation:
 
 1. **Correctness**: All checks in the Accuracy Validation section below must pass.
-2. **Performance exceeding Vulkan**: In the standardized evaluation environment, ROCm throughput for every benchmark listed above must exceed the Vulkan baseline on the same GPU.
+2. **Performance exceeding the target**: In the standardized evaluation environment, ROCm throughput for every benchmark listed above must exceed its target.
 
 ### Bonus Criteria
 
@@ -73,21 +66,14 @@ llama-perplexity -m $MODEL -dev ROCm0 -ngl 99 -f wiki.test.raw -c 4096 -b 4096 -
 | --- | --- |
 | GPU | AMD Radeon PRO W7900D (gfx1100 / RDNA3, 48 GB, single GPU) |
 | Container image | `rocm/pytorch:rocm10.1.0_ubuntu26.04_py3.14_pytorch_release_2.14.0` |
-| Vulkan | Mesa RADV 26.0.8, `KHR_coopmat` |
 | llama.cpp | `aa39d7a3e145a88202793a89462d65e94a5fc25f` |
 
-The ROCm and Vulkan backends must be built from the same llama.cpp commit using identical build configurations and the same `llama-bench` logic. Key options for building the ROCm backend:
+The ROCm backend is built from this llama.cpp commit with these key options:
 
 ```bash
 -DGGML_HIP=ON \
 -DGPU_TARGETS=gfx1100 \
 -DAMDGPU_TARGETS=gfx1100
-```
-
-The Vulkan backend uses:
-
-```bash
--DGGML_VULKAN=ON
 ```
 
 ## Model

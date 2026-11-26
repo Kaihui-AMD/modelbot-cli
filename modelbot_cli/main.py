@@ -112,7 +112,7 @@ def cmd_problems(args) -> int:
         for t in p["tests"]:
             print(f"  ppl {t['name']:<12} ref {t['ref_ppl']}  chunks {t['chunks']}  args {' '.join(t['args'])}")
         for b in p["benchmarks"]:
-            print(f"  bench {b['name']:<18} vulkan {b['vulkan_avg_ts']} t/s  (case {b['case']})")
+            print(f"  bench {b['name']:<18} target {b['target_avg_ts']} t/s  (case {b['case']})")
         print("\n" + p["description"])
         return 0
     for p in client.get("/problems"):
